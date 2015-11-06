@@ -1,6 +1,4 @@
 import {v4 as uuid} from 'node-uuid'
-import AudioSystem from './AudioSystem'
-import schema from './sequence-schema'
 
 const pp = obj => console.log(JSON.stringify(obj, null, 2))
 const log = console.log.bind(console)
@@ -88,11 +86,11 @@ function * FadeOut (domAsset) {
 }
 
 function * Insert (parent, domAsset) {
-  parent.appendChild(domAsset.element)
+  parent.element.appendChild(domAsset.element)
 }
 
 function * Remove (parent, domAsset) {
-  parent.removeChild(domAsset.element)
+  parent.element.removeChild(domAsset.element)
 }
 
 function * Do (fn, ...params) {
@@ -103,7 +101,7 @@ function * IO (domAsset) {
   let done = false  
   let listener = domAsset.element.addEventListener('click', () => done = true)
 
-  console.log('please interact with the canvas')
+  console.log('please interact with the page')
   while (!done) yield
 
   console.log('thanks for your participation')
@@ -150,27 +148,27 @@ class Asset {
 }
 
 class DomAsset extends Asset {
-  constructor(element) {
+  constructor(element, innerHTML, style) {
     super()
     this.element = element
     this.element.classList.add('asset')
+    if (innerHTML !== null) this.element.innerHTML = innerHTML
+    for (let key in style) {
+      element.style[key] = style[key] 
+    }
   }
 }
 
 class ImageAsset extends DomAsset {
-  constructor(element, src) {
-    super(element) 
+  constructor(element, src, style) {
+    super(element, null, style) 
     this.element.src = src
   }
 }
 
 class TextAsset extends DomAsset {
   constructor(element, text, style) {
-    super(element)
-    element.innerText = text
-    for (let key in style) {
-      element.style[key] = style[key] 
-    }
+    super(element, text, style)
   }
 }
 
@@ -181,34 +179,123 @@ class AudioAsset extends Asset {
   }
 }
 
+class Stage {
+  constructor(element, style) {
+    this.element = element
+    this.uuid = 'stage'
+    this.style
+    for (let key in style) {
+      element.style[key] = style[key] 
+    }
+  }
+}
+
+//NOTE: UUID is faked here for this example.  In practice schema assets must have UUIDs
+const program_schema = {
+  sequences: {
+    main: {
+      assets: [{
+        uuid: '123',
+        type: 'image',
+        src: ['emmi.png'],
+        style: {} 
+      }, {
+        uuid: '456',
+        type: 'audio',
+        src: ['test.mp3']
+      }, {
+        uuid: '789',
+        type: 'text',
+        tag: 'p',
+        text: 'Click the logo to continue',
+        style: {
+          font: '30px ariel, sans-serif',
+          color: 'blue' 
+        } 
+      }],
+
+      tasks: [{
+        type: 'parallel',
+        tasks: [{
+          type: 'serial',
+          tasks: [{
+            type: 'insert', 
+            parent: 'stage',
+            subject: '123'
+          }, {
+            type: 'fade-in',
+            subject: '123'
+          }, {
+            type: 'insert',
+            parent: 'stage',
+            subject: '789'
+          }, {
+            type: 'fade-in',
+            subject: '789'
+          }, {
+            type: 'io',
+            subject: '789'   
+          }, {
+            type: 'parallel',
+            tasks: [{
+              type: 'serial',
+              tasks: [{
+                type: 'fade-out',
+                subject: '123'
+              }, {
+                type: 'remove',
+                parent: 'stage',
+                subject: '123'
+              }]
+            }, {
+              type: 'serial',
+              tasks: [{
+                type: 'fade-out',
+                subject: '789'
+              }, {
+                type: 'remove',
+                parent: 'stage',
+                subject: '789'
+              }]
+            }]  
+          }] 
+        }]   
+      }, {
+        type: 'audio-play',
+        subject: '456'
+      }]
+    }       
+  }
+}
+
 const assets = [
-  new ImageAsset(new Image, 'emmi.png'),
+  new Stage(document.body, {}),
+  new ImageAsset(new Image, 'emmi.png', {}),
   new AudioAsset(['test.mp3']),
   new TextAsset(document.createElement('p'), 'Click the logo to continue', {
     font: '30px ariel, sans-serif',
     color: 'blue',
-  })
+  }),
 ]
-const audioSystem = new AudioSystem('main')
 const tasks = Parallel([
   Serial([
-    Insert(document.body, assets[0]),
-    FadeIn(assets[0]), 
-    Insert(document.body, assets[2]),
-    FadeIn(assets[2]), 
-    IO(assets[0]), 
+    Insert(assets[0], assets[1]),
+    FadeIn(assets[1]), 
+    Insert(assets[0], assets[3]),
+    FadeIn(assets[3]), 
+    IO(assets[1]), 
     Parallel([
       Serial([
-        FadeOut(assets[0]),
-        Remove(document.body, assets[0])
+        FadeOut(assets[1]),
+        Remove(assets[0], assets[1])
       ]),
       Serial([
-        FadeOut(assets[2]),
-        Remove(document.body, assets[2])
+        FadeOut(assets[3]),
+        Remove(assets[0], assets[3])
       ])
     ])
   ]),
-  PlayAudio(assets[1]),
+  PlayAudio(assets[2]),
 ])
 const sequence = new Sequence(assets, tasks)
 const variables = {
