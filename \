@@ -1,0 +1,84 @@
+import Pixi from 'pixi' 
+import sequence from './sequence'
+
+const pp = obj => console.log(JSON.stringify(obj, null, 2))
+const log = console.log.bind(console)
+
+function makeUpdate (stage) {
+  let lastTime = Date.now()
+  let thisTime = lastTime
+  let dT = 0
+
+  return function () {
+    lastTime = thisTime
+    thisTime = Date.now()
+    dT = thisTime - lastTime
+
+    stage.update(dT)
+  }
+}
+
+function makeRender (stage) {
+
+}
+
+
+class ImageAsset extends Pixi.Sprite {
+  constructor(texture) {
+    super(texture)
+  }
+
+  static fromSchema (schema) {
+    const texture = new Pixi.Texture.fromImage(schema.media.filename) 
+
+    return new ImageAsset(texture)
+  }
+}
+
+class TextAsset extends Pixi.Text {
+  constructor(text, style) {
+    super(text, style) 
+  }
+
+  static fromSchema (schema) {
+    return new TextAsset(schema.text, {})
+  }
+}
+
+class Sequence {
+  constructor(assets) {
+    this.assets = assets 
+  }
+
+  static fromSchema(schema) {
+    const assets = []   
+
+    for (let asset of schema.assets) {
+      if      (asset.className === 'TextLayoutAsset') assets.push(TextAsset.fromSchema(asset))
+      else if (asset.className === 'ImageAssey')      assets.push(ImageAsset.fromSchema(asset))
+      else                                            continue
+    }
+    return new Sequence(assets)
+  }
+}
+
+class Stage extends Pixi.Container {
+  constructor() {
+    super() 
+  }
+
+  update(dT) {
+    log('updating') 
+  }
+
+  loadSequence(sequence) {
+    for (let asset of sequence) {
+      this.addChild(asset) 
+    } 
+  }
+}
+
+const s = Sequence.fromSchema(sequence)
+const stage = new Pixi.Container()
+
+

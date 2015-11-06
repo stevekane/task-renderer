@@ -1,0 +1,21 @@
+{
+  "name": "task-renderer",
+  "version": "1.0.0",
+  "description": "Heirarchical task renderer",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test",
+    "watch": "watchify -o public/index.js -t babelify --presets es2015 index.js"
+  },
+  "author": "Steve Kane",
+  "license": "MIT",
+  "dependencies": {
+    "node-uuid": "^1.4.3",
+    "pixi": "^0.3.1"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.0.16",
+    "babel-preset-es2015": "^6.0.15",
+    "babelify": "^6.1.2"
+  }
+}
