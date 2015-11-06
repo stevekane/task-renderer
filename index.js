@@ -183,7 +183,6 @@ class Stage {
   constructor(element, style) {
     this.element = element
     this.uuid = 'stage'
-    this.style
     for (let key in style) {
       element.style[key] = style[key] 
     }
@@ -192,8 +191,20 @@ class Stage {
 
 //NOTE: UUID is faked here for this example.  In practice schema assets must have UUIDs
 const program_schema = {
+  variables: {
+    age: {
+      type: "Number",
+      min: 0,
+      max: 250,
+      default: 20
+    }
+  },
   sequences: {
     main: {
+      connections: [{
+        expression: true,
+        sequenceName: null
+      }],
       assets: [{
         uuid: '123',
         type: 'image',

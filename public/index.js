@@ -1,23 +1,17 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
+"use strict";
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var marked0$0 = [Parallel, Serial, Wait, FadeIn, FadeOut, Insert, Remove, Do, IO, PlayAudio].map(regeneratorRuntime.mark);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _nodeUuid = require('node-uuid');
-
-var _sequenceSchema = require('./sequence-schema');
-
-var _sequenceSchema2 = _interopRequireDefault(_sequenceSchema);
 
 var pp = function pp(obj) {
   return console.log(JSON.stringify(obj, null, 2));
@@ -78,7 +72,7 @@ function Parallel(tasks) {
 
       case 14:
         context$1$0.prev = 14;
-        context$1$0.t0 = context$1$0['catch'](10);
+        context$1$0.t0 = context$1$0["catch"](10);
         _didIteratorError = true;
         _iteratorError = context$1$0.t0;
 
@@ -86,8 +80,8 @@ function Parallel(tasks) {
         context$1$0.prev = 18;
         context$1$0.prev = 19;
 
-        if (!_iteratorNormalCompletion && _iterator['return']) {
-          _iterator['return']();
+        if (!_iteratorNormalCompletion && _iterator["return"]) {
+          _iterator["return"]();
         }
 
       case 21:
@@ -111,7 +105,7 @@ function Parallel(tasks) {
         break;
 
       case 28:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[0], this, [[10, 14, 18, 26], [19,, 21, 25]]);
@@ -143,7 +137,7 @@ function Serial(tasks) {
         break;
 
       case 10:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[1], this);
@@ -174,10 +168,10 @@ function Wait(duration) {
         break;
 
       case 9:
-        console.log('waited: ' + elapsed);
+        console.log("waited: " + elapsed);
 
       case 10:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[2], this);
@@ -217,7 +211,7 @@ function FadeIn(domAsset) {
         break;
 
       case 15:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[3], this);
@@ -256,7 +250,7 @@ function FadeOut(domAsset) {
         break;
 
       case 14:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[4], this);
@@ -269,7 +263,7 @@ function Insert(parent, domAsset) {
         parent.element.appendChild(domAsset.element);
 
       case 1:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[5], this);
@@ -282,7 +276,7 @@ function Remove(parent, domAsset) {
         parent.element.removeChild(domAsset.element);
 
       case 1:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[6], this);
@@ -299,7 +293,7 @@ function Do(fn) {
         fn.apply(null, params);
 
       case 1:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[7], this);
@@ -336,7 +330,7 @@ function IO(domAsset) {
         domAsset.element.removeEventListener(listener);
 
       case 10:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[8], this);
@@ -374,7 +368,7 @@ function PlayAudio(audioAsset) {
         console.log('audio completed');
 
       case 9:
-      case 'end':
+      case "end":
         return context$1$0.stop();
     }
   }, marked0$0[9], this);
@@ -401,7 +395,7 @@ var Program = (function () {
   }
 
   _createClass(Program, [{
-    key: 'update',
+    key: "update",
     value: function update(dT) {
       this.sequence.tasks.next(dT);
     }
@@ -422,7 +416,7 @@ var DomAsset = (function (_Asset) {
   function DomAsset(element, innerHTML, style) {
     _classCallCheck(this, DomAsset);
 
-    _get(Object.getPrototypeOf(DomAsset.prototype), 'constructor', this).call(this);
+    _get(Object.getPrototypeOf(DomAsset.prototype), "constructor", this).call(this);
     this.element = element;
     this.element.classList.add('asset');
     if (innerHTML !== null) this.element.innerHTML = innerHTML;
@@ -440,7 +434,7 @@ var ImageAsset = (function (_DomAsset) {
   function ImageAsset(element, src, style) {
     _classCallCheck(this, ImageAsset);
 
-    _get(Object.getPrototypeOf(ImageAsset.prototype), 'constructor', this).call(this, element, null, style);
+    _get(Object.getPrototypeOf(ImageAsset.prototype), "constructor", this).call(this, element, null, style);
     this.element.src = src;
   }
 
@@ -453,7 +447,7 @@ var TextAsset = (function (_DomAsset2) {
   function TextAsset(element, text, style) {
     _classCallCheck(this, TextAsset);
 
-    _get(Object.getPrototypeOf(TextAsset.prototype), 'constructor', this).call(this, element, text, style);
+    _get(Object.getPrototypeOf(TextAsset.prototype), "constructor", this).call(this, element, text, style);
   }
 
   return TextAsset;
@@ -465,7 +459,7 @@ var AudioAsset = (function (_Asset2) {
   function AudioAsset(src) {
     _classCallCheck(this, AudioAsset);
 
-    _get(Object.getPrototypeOf(AudioAsset.prototype), 'constructor', this).call(this);
+    _get(Object.getPrototypeOf(AudioAsset.prototype), "constructor", this).call(this);
     this.src = src;
   }
 
@@ -477,7 +471,6 @@ var Stage = function Stage(element, style) {
 
   this.element = element;
   this.uuid = 'stage';
-  this.style;
   for (var key in style) {
     element.style[key] = style[key];
   }
@@ -487,8 +480,20 @@ var Stage = function Stage(element, style) {
 ;
 
 var program_schema = {
+  variables: {
+    age: {
+      type: "Number",
+      min: 0,
+      max: 250,
+      "default": 20
+    }
+  },
   sequences: {
     main: {
+      connections: [{
+        expression: true,
+        sequenceName: null
+      }],
       assets: [{
         uuid: '123',
         type: 'image',
@@ -578,7 +583,7 @@ var program = new Program(variables, sequence);
 window.program = program;
 setInterval(makeUpdate(program), TICK_RATE);
 
-},{"./sequence-schema":3,"node-uuid":2}],2:[function(require,module,exports){
+},{"node-uuid":2}],2:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -826,461 +831,5 @@ setInterval(makeUpdate(program), TICK_RATE);
     _global.uuid = uuid;
   }
 }).call(this);
-
-},{}],3:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-var Sequence1 = {
-    'className': 'Sequence',
-    'assets': [{
-        'className': 'TextLayoutAsset',
-        'name': 'background',
-        'staticStyle': {
-            'border': {
-                'color': '#000000',
-                'radius': 82.8,
-                'style': 'solid',
-                'width': 0
-            },
-            'box': {
-                'backgroundColor': '#dff4fe',
-                'padding': 0,
-                'shadowColor': '#dfe7ee',
-                'shadowSize': 24
-            },
-            'text': {
-                'align': 'center',
-                'color': '#47698c',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 240,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'text': '',
-        'textEditable': false,
-        'time': 0,
-        'type': 'background',
-        'visualStates': [{
-            'height': 1,
-            'opacity': 0,
-            'removable': false,
-            'time': 0,
-            'width': 1,
-            'x': 0,
-            'y': 0
-        }, {
-            'height': 1,
-            'opacity': 1,
-            'removable': false,
-            'time': 410,
-            'width': 1,
-            'x': 0,
-            'y': 0
-        }, {
-            'height': 1,
-            'opacity': 1,
-            'removable': false,
-            'time': 5945,
-            'width': 1,
-            'x': 0,
-            'y': 0
-        }, {
-            'height': 1,
-            'opacity': 0,
-            'removable': false,
-            'time': 6355,
-            'width': 1,
-            'x': 0,
-            'y': 0
-        }],
-        'zIndex': 0
-    }, {
-        'className': 'TextLayoutAsset',
-        'name': 'header box',
-        'staticStyle': {
-            'border': {
-                'color': '#000000',
-                'radius': 0,
-                'style': 'solid',
-                'width': 0
-            },
-            'box': {
-                'backgroundColor': 'transparent',
-                'padding': 0,
-                'shadowColor': '#000000',
-                'shadowSize': 0
-            },
-            'text': {
-                'align': 'left',
-                'color': '#47698c',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 73,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'text': '',
-        'textEditable': false,
-        'time': 0,
-        'type': 'head',
-        'visualStates': [{
-            'height': 0.08,
-            'opacity': 0,
-            'removable': false,
-            'time': 0,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.33
-        }, {
-            'height': 0.08,
-            'opacity': 1,
-            'removable': false,
-            'time': 410,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.33
-        }, {
-            'height': 0.08,
-            'opacity': 1,
-            'removable': false,
-            'time': 5945,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.33
-        }, {
-            'height': 0.08,
-            'opacity': 0,
-            'removable': false,
-            'time': 6355,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.33
-        }],
-        'zIndex': 1
-    }, {
-        'className': 'TextLayoutAsset',
-        'name': 'header',
-        'staticStyle': {
-            'border': {
-                'color': 'transparent',
-                'radius': 0,
-                'style': 'solid',
-                'width': 0
-            },
-            'box': {
-                'backgroundColor': '#ff00ff',
-                'padding': 0,
-                'shadowColor': 'transparent',
-                'shadowSize': 0
-            },
-            'text': {
-                'align': 'left',
-                'color': '#47698c',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 240,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'text': 'Colonoscopy',
-        'textEditable': true,
-        'time': 0,
-        'type': 'head',
-        'visualStates': [{
-            'height': 0.08,
-            'opacity': 0,
-            'removable': false,
-            'time': 0,
-            'width': 0.67,
-            'x': 0.10155884645362433,
-            'y': 0.3216897506925208
-        }, {
-            'height': 0.08,
-            'opacity': 1,
-            'removable': false,
-            'time': 410,
-            'width': 0.67,
-            'x': 0.10155884645362433,
-            'y': 0.3216897506925208
-        }, {
-            'time': 3000,
-            'height': 0.16,
-            'opacity': 1,
-            'removable': false,
-            'width': 0.67,
-            'x': 1,
-            'y': 0.3216897506925208
-
-        }, {
-            'height': 0.08,
-            'opacity': 1,
-            'removable': false,
-            'time': 5945,
-            'width': 0.67,
-            'x': 0.10155884645362433,
-            'y': 0.3216897506925208
-        }, {
-            'height': 0.08,
-            'opacity': 0,
-            'removable': false,
-            'time': 6355,
-            'width': 0.67,
-            'x': 0.10155884645362433,
-            'y': 0.3216897506925208
-        }],
-        'zIndex': 3
-    }, {
-        'className': 'TextLayoutAsset',
-        'name': 'content box',
-        'staticStyle': {
-            'border': {
-                'color': '#000000',
-                'radius': 32,
-                'style': 'solid',
-                'width': 0
-            },
-            'box': {
-                'backgroundColor': '#ffffff',
-                'padding': 160,
-                'shadowColor': '#dbedfa',
-                'shadowSize': 24
-            },
-            'text': {
-                'align': 'left',
-                'color': '#47698c',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 160,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'text': '',
-        'textEditable': false,
-        'time': 0,
-        'type': 'box',
-        'visualStates': [{
-            'height': 0.4,
-            'opacity': 0,
-            'removable': false,
-            'time': 0,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 1,
-            'removable': false,
-            'time': 410,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 1,
-            'removable': false,
-            'time': 5945,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 0,
-            'removable': false,
-            'time': 6355,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }],
-        'zIndex': 2
-    }, {
-        'className': 'TextLayoutAsset',
-        'name': 'content',
-        'staticStyle': {
-            'border': {
-                'color': '#000000',
-                'radius': 32,
-                'style': 'solid',
-                'width': 0
-            },
-            'box': {
-                'backgroundColor': 'transparent',
-                'padding': 160,
-                'shadowColor': '#dbedfa',
-                'shadowSize': 19
-            },
-            'text': {
-                'align': 'left',
-                'color': '#47698c',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 160,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'text': 'The goal of a colonoscopy is to look for early signs of colon cancer or other problems.',
-        'textEditable': true,
-        'time': 0,
-        'type': 'box',
-        'visualStates': [{
-            'height': 0.4,
-            'opacity': 0,
-            'removable': false,
-            'time': 0,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 1,
-            'removable': false,
-            'time': 410,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 1,
-            'removable': false,
-            'time': 5945,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }, {
-            'height': 0.4,
-            'opacity': 0,
-            'removable': false,
-            'time': 6355,
-            'width': 0.67,
-            'x': 0.1,
-            'y': 0.42
-        }],
-        'zIndex': 4
-    }, {
-        'className': 'ImageAsset',
-        'media': {
-            'filename': 'emmi.png',
-            'metadata': {
-                'ratio': 0.717689863687609
-            },
-            'name': '2_04',
-            'path': '',
-            'type': 'image'
-        },
-        'name': 'New image',
-        'staticStyle': {
-            'border': {
-                'color': '#000000',
-                'radius': 0,
-                'style': 'none',
-                'width': 0
-            },
-            'box': {
-                'padding': 0,
-                'shadowColor': '#000000',
-                'shadowSize': 0
-            },
-            'text': {
-                'align': 'left',
-                'color': '#000000',
-                'decoration': 'none',
-                'fontFamily': 'Roboto Condensed',
-                'lineHeight': 1.2,
-                'size': 73,
-                'weight': 'normal',
-                'whiteSpace': 'normal'
-            }
-        },
-        'time': 123,
-        'type': null,
-        'visualStates': [{
-            'height': 0.36158313993520635,
-            'opacity': 0,
-            'removable': false,
-            'time': 13,
-            'width': 0.26000031949759184,
-            'x': 0.72,
-            'y': 0.1
-        }, {
-            'height': 0.36158313993520635,
-            'opacity': 1,
-            'removable': false,
-            'time': 492,
-            'width': 0.26000031949759184,
-            'x': 0.72,
-            'y': 0.1
-        }, {
-            'height': 0.36158313993520635,
-            'opacity': 1,
-            'removable': false,
-            'time': 5781,
-            'width': 0.26000031949759184,
-            'x': 0.72,
-            'y': 0.1
-        }, {
-            'height': 0.36158313993520635,
-            'opacity': 0,
-            'removable': false,
-            'time': 6232,
-            'width': 0.26000031949759184,
-            'x': 0.72,
-            'y': 0.1
-        }],
-        'zIndex': 5
-    }],
-    'name': null,
-    'objectId': 1039,
-    'parentObjectId': 1018,
-    'screens': [{
-        'rows': [{
-            'audioText': ' Now, as you may know, the goal of a colonoscopy is to look for early signs of colon cancer or other problems. &nbsp;',
-            'endTime': 6370,
-            'media': {
-                'filename': 'media/audio/2_05.mp3',
-                'metadata': {
-                    'duration': 6370,
-                    'text': ''
-                },
-                'name': '2_04',
-                'path': '',
-                'type': 'audio'
-            },
-            'startTime': 6790,
-            'wait': 420
-        }, {
-            'audioText': ' Now, as you may know, the goal of a colonoscopy is to look for early signs of colon cancer or other problems. &nbsp;',
-            'endTime': 6370,
-            'media': {
-                'filename': 'media/audio/2_04.mp3',
-                'metadata': {
-                    'duration': 6370,
-                    'text': ''
-                },
-                'name': '2_04',
-                'path': '',
-                'type': 'audio'
-            },
-            'startTime': 0,
-            'wait': 4200
-        }]
-    }],
-    'waitAfter': 0
-};
-
-exports['default'] = Sequence1;
-module.exports = exports['default'];
 
 },{}]},{},[1]);
