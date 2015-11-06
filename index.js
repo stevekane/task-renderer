@@ -1,7 +1,6 @@
 import {v4 as uuid} from 'node-uuid'
-
-const pp = obj => console.log(JSON.stringify(obj, null, 2))
-const log = console.log.bind(console)
+import {pp, log, clone} from './utils'
+import programSchema from './programSchema'
 
 const TICK_RATE = 24
 
@@ -127,17 +126,82 @@ class Sequence {
   }
 }
 
-//TODO: probably want to take a complete list of sequence schemas and hydrate them
-//similar to simulation zones when they are actually to be played.
-//Probably want concept of sequence manager that is reponsible for traversal
+class Cache {
+  constructor() {
+    this.images = {}
+    this.audio = {}
+  }
+}
+
 class Program {
-  constructor(variables, sequence) {
-    this.variables = variables
-    this.sequence = sequence
+  constructor(schema) {
+    let variables = {}
+
+    this.cache = new Cache
+    this.variables = {}
+
+    for (let key in schema.variables) {
+      Object.defineProperty(this.variables, key, {
+        set: function (val) {
+          variables[key] = val
+          log('A variable has changed')
+          pp(variables) 
+        },
+        get: function () {
+          return variables[key]
+        }
+      })
+      this.variables[key] = schema.variables[key].default
+    }
+
+    this.activeSequence = null
+    this.schema = schema 
+  }
+
+  startSequence(name) {
+    const schema = this.schema.sequences[name] 
+
+    if (!schema) throw new Error(`No schema named ${name} was found`)
+
+    let assets = {}
+    for (let asset of schema.asset) {
+      classifier:
+      switch (asset.type) {
+        case 'stage': {
+          assets[asset.uuid] = new Stage(
+            document.body, 
+            clone(asset.style))
+          break;
+        }
+        case 'text': {
+          assets[asset.uuid] = new TextAsset(
+            document.createElement(asset.tag),
+            asset.text,
+            clone(asset.style))
+          break;
+        } 
+        case 'image': {
+          assets[asset.uuid] = new ImageAsset(
+            asset.src, clone(asset.style))
+          break;
+        }
+        case 'audio': {
+          assets[asset.uuid] = new AudioAsset(asset.src) 
+          break;
+        }
+        default: throw new Error('Unrecognized asset type in schema')
+      }
+    }
+
+    //TODO: temporary
+    let tasks = Wait(2000)
+
+    this.activeSequence = new Sequence(assets, tasks)
   }
 
   update(dT) {
-    this.sequence.tasks.next(dT)
+    if (!this.activeSequence) return
+    this.activeSequence.tasks.next(dT)
   }
 }
 
@@ -189,131 +253,43 @@ class Stage {
   }
 }
 
-//NOTE: UUID is faked here for this example.  In practice schema assets must have UUIDs
-const program_schema = {
-  variables: {
-    age: {
-      type: "Number",
-      min: 0,
-      max: 250,
-      default: 20
-    }
-  },
-  sequences: {
-    main: {
-      connections: [{
-        expression: true,
-        sequenceName: null
-      }],
-      assets: [{
-        uuid: '123',
-        type: 'image',
-        src: ['emmi.png'],
-        style: {} 
-      }, {
-        uuid: '456',
-        type: 'audio',
-        src: ['test.mp3']
-      }, {
-        uuid: '789',
-        type: 'text',
-        tag: 'p',
-        text: 'Click the logo to continue',
-        style: {
-          font: '30px ariel, sans-serif',
-          color: 'blue' 
-        } 
-      }],
-
-      tasks: [{
-        type: 'parallel',
-        tasks: [{
-          type: 'serial',
-          tasks: [{
-            type: 'insert', 
-            parent: 'stage',
-            subject: '123'
-          }, {
-            type: 'fade-in',
-            subject: '123'
-          }, {
-            type: 'insert',
-            parent: 'stage',
-            subject: '789'
-          }, {
-            type: 'fade-in',
-            subject: '789'
-          }, {
-            type: 'io',
-            subject: '789'   
-          }, {
-            type: 'parallel',
-            tasks: [{
-              type: 'serial',
-              tasks: [{
-                type: 'fade-out',
-                subject: '123'
-              }, {
-                type: 'remove',
-                parent: 'stage',
-                subject: '123'
-              }]
-            }, {
-              type: 'serial',
-              tasks: [{
-                type: 'fade-out',
-                subject: '789'
-              }, {
-                type: 'remove',
-                parent: 'stage',
-                subject: '789'
-              }]
-            }]  
-          }] 
-        }]   
-      }, {
-        type: 'audio-play',
-        subject: '456'
-      }]
-    }       
-  }
-}
-
-const assets = [
-  new Stage(document.body, {}),
-  new ImageAsset(new Image, 'emmi.png', {}),
-  new AudioAsset(['test.mp3']),
-  new TextAsset(document.createElement('p'), 'Click the logo to continue', {
+/* ARCHIVED FOR REFERENCE -- building from schema now
+const assets = {
+  stage: new Stage(document.body, {}),
+  logo: new ImageAsset(new Image, 'emmi.png', {}),
+  introSound: new AudioAsset(['test.mp3']),
+  text: new TextAsset(document.createElement('p'), 'Click the logo to continue', {
     font: '30px ariel, sans-serif',
     color: 'blue',
   }),
-]
+}
 const tasks = Parallel([
   Serial([
-    Insert(assets[0], assets[1]),
-    FadeIn(assets[1]), 
-    Insert(assets[0], assets[3]),
-    FadeIn(assets[3]), 
-    IO(assets[1]), 
+    Insert(assets.stage, assets.logo),
+    FadeIn(assets.logo), 
+    Insert(assets.stage, assets.text),
+    FadeIn(assets.text), 
+    IO(assets.logo), 
     Parallel([
       Serial([
-        FadeOut(assets[1]),
-        Remove(assets[0], assets[1])
+        FadeOut(assets.logo),
+        Remove(assets.stage, assets.logo)
       ]),
       Serial([
-        FadeOut(assets[3]),
-        Remove(assets[0], assets[3])
+        FadeOut(assets.text),
+        Remove(assets.stage, assets.text)
       ])
     ])
   ]),
-  PlayAudio(assets[2]),
+  PlayAudio(assets.introSound),
 ])
 const sequence = new Sequence(assets, tasks)
 const variables = {
   age: null,
   gender: null
 }
-const program = new Program(variables, sequence)
+*/
+const program = new Program(programSchema)
 
 window.program = program
 setInterval(makeUpdate(program), TICK_RATE)
