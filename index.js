@@ -88,8 +88,6 @@ function * FadeOut (domAsset) {
   let remaining = 12
   let classRemoved = false
 
-  domAsset.element.classList.remove("active")
-
   while (remaining > 0) {
     let state = yield
 
@@ -104,7 +102,6 @@ function * FadeOut (domAsset) {
 }
 
 function * Insert (parent, domAsset) {
-  console.log(parent, domAsset)
   parent.element.appendChild(domAsset.element)
 }
 
