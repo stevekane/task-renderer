@@ -1,10 +1,18 @@
 import {v4 as uuid} from 'node-uuid'
-import {pp, log, clone, extend} from './utils'
+import {pp, log, clone, extend, find} from './utils'
 import programSchema from './programSchema'
 
 const TICK_RATE = 24
+const STAGE_ELEMENT = document.body
 
-function makeUpdate (app) {
+const PROGRAM_STATE = {
+  LOADING: 0,
+  PLAYING: 1,
+  PAUSED: 2,
+  DONE: 3
+}
+
+function makeUpdate (program) {
   let lastTime = Date.now()
   let thisTime = lastTime
   let dT = 0
@@ -14,7 +22,14 @@ function makeUpdate (app) {
     thisTime = Date.now()
     dT = thisTime - lastTime
 
-    app.update(dT)
+    //TODO: check that dT is in valid range for "normal tick"
+    if (program.activeSequence) {
+      if (program.activeSequence.next(program.state).done()) {
+        let targetSequence = program.activeState
+
+
+      }
+    }
   }
 }
 
@@ -57,7 +72,7 @@ function * Wait (duration) {
 
 function * FadeIn (domAsset) {
   let elapsed = 0
-  let duration = 500
+  let duration = 12
   let dT = 0
 
   dT = yield
@@ -71,7 +86,7 @@ function * FadeIn (domAsset) {
 }
 
 function * FadeOut (domAsset) {
-  let remaining = 500 
+  let remaining = 12
   let dT = 0
 
   dT = yield
@@ -119,84 +134,49 @@ function * PlayAudio (audioAsset) {
   console.log('audio completed')
 }
 
-class Sequence {
-  constructor(assets, tasks) {
-    this.assets = assets
-    this.tasks = tasks
+class Connection {
+  constructor({expression, sequenceUUID}) {
+    this.expression = new Function('$', expression) 
+    this.sequenceUUID = sequenceUUID
   }
 }
 
-class Cache {
-  constructor() {
-    this.images = {}
-    this.audio = {}
+class Sequence {
+  constructor({uuid, name, assetSchemas, taskSchemas, connectionSchemas}) {
+    this.name = name
+    this.uuid = uuid
+    this.assets = assetSchemas.map(Asset.fromSchema)
+    this.tasks = Wait(48)
+    this.connections = connectionSchemas.map(s => new Connection(s))
+  }
+
+  findNext(variables) {
+    let connection = find(({expression}) => expression(variables))
+
+    return connection ? connection.sequenceUUID : null
   }
 }
 
 class Program {
-  constructor(schema) {
-    let variables = {}
-
-    this.cache = new Cache
-    this.variables = {}
-
-    for (let key in schema.variables) {
-      Object.defineProperty(this.variables, key, {
-        set: function (val) {
-          variables[key] = val
-          log('A variable has changed')
-          pp(variables) 
-        },
-        get: function () {
-          return variables[key]
-        }
-      })
-      this.variables[key] = schema.variables[key].default
-    }
-
+  constructor(programSchema) {
+    this.name = programSchema.name
+    this.uuid = programSchema.uuid
+    this.state = PROGRAM_STATE.READY
     this.activeSequence = null
-    this.schema = schema 
+    this.schema = programSchema
+    this.variables = this.schema.variableSchemas.reduce((map, variableSchema) => {
+      map[variableSchema.name] = variableSchema.value
+      return map
+    }, {})
   }
 
   startSequence(name) {
-    const schema = this.schema.sequences[name] 
+    const sequenceSchema = this.schema.sequenceSchemas[name] 
 
     if (!schema) throw new Error(`No schema named ${name} was found`)
 
-    let assets = {}
-    for (let asset of schema.asset) {
-      classifier:
-      switch (asset.type) {
-        case 'stage': {
-          assets[asset.uuid] = new Stage(
-            document.body, 
-            clone(asset.style))
-          break;
-        }
-        case 'text': {
-          assets[asset.uuid] = new TextAsset(
-            document.createElement(asset.tag),
-            asset.text,
-            clone(asset.style))
-          break;
-        } 
-        case 'image': {
-          assets[asset.uuid] = new ImageAsset(
-            asset.src, clone(asset.style))
-          break;
-        }
-        case 'audio': {
-          assets[asset.uuid] = new AudioAsset(asset.src) 
-          break;
-        }
-        default: throw new Error('Unrecognized asset type in schema')
-      }
-    }
-
-    //TODO: temporary
-    let tasks = Wait(2000)
-
     this.activeSequence = new Sequence(assets, tasks)
+    this.state = PROGRAM_STATE.READY
   }
 
   update(dT) {
@@ -205,77 +185,48 @@ class Program {
   }
 }
 
-// BEGIN - ASSETS
-class Stage {
-  constructor(element, {style}) {
-    this.element = document.body
+const Asset = {
+  fromSchema(assetSchema) {
+    switch (assetSchema.type) {
+      case 'stage': return new Asset.Stage(assetSchema)
+      case 'image': return new Asset.Image(assetSchema)
+      case 'audio': return new Asset.Audio(assetSchema)
+      case 'text':  return new Asst.Text(assetSchema)
+      default:      return new Asset.Unknown(assetSchema)
+    }
+  },
+
+  Stage({style}) {
+    this.element = STAGE_ELEMENT
     this.uuid = 'stage'
     extend(this.element.style, style)
-  }
-}
+  },
 
-class ImageAsset {
-  constructor({uuid, src, style}) {
+  Image({uuid, src, style}) {
     this.uuid = uuid
     this.element = new Image
     this.element.src = src
     extend(this.element.style, style)
-  }
-}
+  },
 
-class TextAsset {
-  constructor({uuid, tag, text, style}) {
+  Text({uuid, tag, text, style}) {
     this.uuid = uuid
     this.element = document.createElement(tag) 
     this.element.innerText = text
     extend(this.element.style, style)
-  }
-}
+  },
 
-class AudioAsset {
-  constructor({uuid, src}) {
+  Audio({uuid, src}) {
     this.uuid = uuid
     this.src = src
+  },
+
+  Unknown(schema) {
+    this.uuid = schema.uuid
+    this.schema = schema 
   }
 }
-// END - ASSETS
 
-/* ARCHIVED FOR REFERENCE -- building from schema now
-const assets = {
-  stage: new Stage(document.body, {}),
-  logo: new ImageAsset(new Image, 'emmi.png', {}),
-  introSound: new AudioAsset(['test.mp3']),
-  text: new TextAsset(document.createElement('p'), 'Click the logo to continue', {
-    font: '30px ariel, sans-serif',
-    color: 'blue',
-  }),
-}
-const tasks = Parallel([
-  Serial([
-    Insert(assets.stage, assets.logo),
-    FadeIn(assets.logo), 
-    Insert(assets.stage, assets.text),
-    FadeIn(assets.text), 
-    IO(assets.logo), 
-    Parallel([
-      Serial([
-        FadeOut(assets.logo),
-        Remove(assets.stage, assets.logo)
-      ]),
-      Serial([
-        FadeOut(assets.text),
-        Remove(assets.stage, assets.text)
-      ])
-    ])
-  ]),
-  PlayAudio(assets.introSound),
-])
-const sequence = new Sequence(assets, tasks)
-const variables = {
-  age: null,
-  gender: null
-}
-*/
 const program = new Program(programSchema)
 
 window.program = program
