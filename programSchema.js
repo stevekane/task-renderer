@@ -1,4 +1,3 @@
-//NOTE: UUID is faked here for this example.  In practice schema assets must have UUIDs
 export default {
   resources: {
     images: [
@@ -99,4 +98,3 @@ export default {
     }       
   }
 }
-

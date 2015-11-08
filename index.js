@@ -1,5 +1,5 @@
 import {v4 as uuid} from 'node-uuid'
-import {pp, log, clone} from './utils'
+import {pp, log, clone, extend} from './utils'
 import programSchema from './programSchema'
 
 const TICK_RATE = 24
@@ -205,53 +205,40 @@ class Program {
   }
 }
 
-class Asset {
-  constructor(element) {
-    this.uuid = uuid() 
+// BEGIN - ASSETS
+class Stage {
+  constructor(element, {style}) {
+    this.element = document.body
+    this.uuid = 'stage'
+    extend(this.element.style, style)
   }
 }
 
-class DomAsset extends Asset {
-  constructor(element, innerHTML, style) {
-    super()
-    this.element = element
-    this.element.classList.add('asset')
-    if (innerHTML !== null) this.element.innerHTML = innerHTML
-    for (let key in style) {
-      element.style[key] = style[key] 
-    }
-  }
-}
-
-class ImageAsset extends DomAsset {
-  constructor(element, src, style) {
-    super(element, null, style) 
+class ImageAsset {
+  constructor({uuid, src, style}) {
+    this.uuid = uuid
+    this.element = new Image
     this.element.src = src
+    extend(this.element.style, style)
   }
 }
 
-class TextAsset extends DomAsset {
-  constructor(element, text, style) {
-    super(element, text, style)
+class TextAsset {
+  constructor({uuid, tag, text, style}) {
+    this.uuid = uuid
+    this.element = document.createElement(tag) 
+    this.element.innerText = text
+    extend(this.element.style, style)
   }
 }
 
-class AudioAsset extends Asset {
-  constructor(src) {
-    super()
+class AudioAsset {
+  constructor({uuid, src}) {
+    this.uuid = uuid
     this.src = src
   }
 }
-
-class Stage {
-  constructor(element, style) {
-    this.element = element
-    this.uuid = 'stage'
-    for (let key in style) {
-      element.style[key] = style[key] 
-    }
-  }
-}
+// END - ASSETS
 
 /* ARCHIVED FOR REFERENCE -- building from schema now
 const assets = {

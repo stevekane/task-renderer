@@ -13,3 +13,11 @@ export function clone (obj) {
   } 
   return out
 }
+
+//mutative!
+export function extend (obj, next) {
+  for (let key in next) {
+    if (next.hasOwnProperty(key)) obj[key] = next[key]
+  } 
+  return obj
+}
