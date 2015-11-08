@@ -28,3 +28,10 @@ export function find (predFn, array) {
   }
   return null
 }
+
+export function findWhere(key, val, array) {
+  for (let item of array) {
+    if (item[key] === val) return item 
+  }
+  return null
+}

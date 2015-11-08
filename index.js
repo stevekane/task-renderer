@@ -1,5 +1,5 @@
 import {v4 as uuid} from 'node-uuid'
-import {pp, log, clone, extend, find} from './utils'
+import {pp, log, clone, extend, find, findWhere} from './utils'
 import programSchema from './programSchema'
 
 const TICK_RATE = 24
@@ -7,9 +7,10 @@ const STAGE_ELEMENT = document.body
 
 const PROGRAM_STATE = {
   LOADING: 0,
-  PLAYING: 1,
-  PAUSED: 2,
-  DONE: 3
+  READY: 1,
+  PLAYING: 2,
+  PAUSED: 3,
+  DONE: 4
 }
 
 function makeUpdate (program) {
@@ -24,24 +25,22 @@ function makeUpdate (program) {
 
     //TODO: check that dT is in valid range for "normal tick"
     if (program.activeSequence) {
-      if (program.activeSequence.next(program.state).done()) {
-        let targetSequence = program.activeState
+      if (program.activeSequence.tasks.next(program.state).done) {
+        let targetSequence = program.activeSequence.findNext(program.variables)
 
-
+        if (targetSequence) program.startSequence(targetSequence) 
+        else                program.state = PROGRAM_STATE.DONE
       }
     }
   }
 }
 
 function * Parallel (tasks) {
-  let time = 0
-  let dT = 0
-
   while (tasks.length) {
-    dT = yield
-    time += dT
+    let state = yield
+
     for (let task of tasks) {
-      if (task.next(dT).done) {
+      if (task.next(state).done) {
         tasks.splice(tasks.indexOf(task), 1)
       }
     } 
@@ -49,23 +48,20 @@ function * Parallel (tasks) {
 }
 
 function * Serial (tasks) {
-  let time = 0
-  let dT = 0
-
   while (tasks.length) {
-    dT = yield
-    time += dT
-    if (tasks[0].next(dT).done) tasks.shift()
+    let state = yield
+
+    if (tasks[0].next(state).done) tasks.shift()
   }
 }
 
 function * Wait (duration) {
   let elapsed = 0 
-  let dT = 0
 
   while (elapsed < duration) {
-    dT = yield
-    elapsed += dT 
+    let state = yield
+
+    if (state === PROGRAM_STATE.PLAYING) elapsed++
   }
   console.log(`waited: ${elapsed}`)
 }
@@ -73,42 +69,47 @@ function * Wait (duration) {
 function * FadeIn (domAsset) {
   let elapsed = 0
   let duration = 12
-  let dT = 0
-
-  dT = yield
-  elapsed += dT 
-  domAsset.element.classList.add("active")
+  let classAdded = false
 
   while (elapsed < duration) {
-    dT = yield
-    elapsed += dT 
+    let state = yield
+
+    if (state === PROGRAM_STATE.PLAYING) {
+      if (!classAdded) {
+        domAsset.element.classList.add('active')
+        classAdded = true
+      }
+      elapsed++
+    }
   }
 }
 
 function * FadeOut (domAsset) {
   let remaining = 12
-  let dT = 0
+  let classRemoved = false
 
-  dT = yield
-  remaining -= dT 
   domAsset.element.classList.remove("active")
 
   while (remaining > 0) {
-    dT = yield
-    remaining -= dT 
+    let state = yield
+
+    if (state === PROGRAM_STATE.PLAYING) {
+      if (!classRemoved) {
+        domAsset.element.classList.remove('active')
+        classRemoved = true
+      }
+      remaining--
+    }
   }
 }
 
 function * Insert (parent, domAsset) {
+  console.log(parent, domAsset)
   parent.element.appendChild(domAsset.element)
 }
 
 function * Remove (parent, domAsset) {
   parent.element.removeChild(domAsset.element)
-}
-
-function * Do (fn, ...params) {
-  fn.apply(null, params)
 }
 
 function * IO (domAsset) {
@@ -146,12 +147,21 @@ class Sequence {
     this.name = name
     this.uuid = uuid
     this.assets = assetSchemas.map(Asset.fromSchema)
-    this.tasks = Wait(48)
+    this.tasks = Serial([
+      Wait(48), 
+      Parallel([
+        PlayAudio(findWhere('uuid', '456', this.assets)),
+        Serial([
+          Insert(findWhere('uuid', 'stage', this.assets), findWhere('uuid', '123', this.assets)),
+          FadeIn(findWhere('uuid', '123', this.assets))
+        ])
+      ])
+    ])
     this.connections = connectionSchemas.map(s => new Connection(s))
   }
 
   findNext(variables) {
-    let connection = find(({expression}) => expression(variables))
+    let connection = find(({expression}) => expression(variables), this.connections)
 
     return connection ? connection.sequenceUUID : null
   }
@@ -170,28 +180,24 @@ class Program {
     }, {})
   }
 
-  startSequence(name) {
-    const sequenceSchema = this.schema.sequenceSchemas[name] 
+  startSequence(uuid) {
+    const sequenceSchema = findWhere('uuid', uuid, this.schema.sequenceSchemas)
 
-    if (!schema) throw new Error(`No schema named ${name} was found`)
+    if (!sequenceSchema) throw new Error(`No schema named ${name} was found`)
 
-    this.activeSequence = new Sequence(assets, tasks)
-    this.state = PROGRAM_STATE.READY
-  }
-
-  update(dT) {
-    if (!this.activeSequence) return
-    this.activeSequence.tasks.next(dT)
+    this.activeSequence = new Sequence(sequenceSchema)
+    this.state = PROGRAM_STATE.PLAYING
   }
 }
 
+//TODO: really not a fan of the "asset" class for opacity.  Consider ditching CSS...
 const Asset = {
   fromSchema(assetSchema) {
     switch (assetSchema.type) {
       case 'stage': return new Asset.Stage(assetSchema)
       case 'image': return new Asset.Image(assetSchema)
       case 'audio': return new Asset.Audio(assetSchema)
-      case 'text':  return new Asst.Text(assetSchema)
+      case 'text':  return new Asset.Text(assetSchema)
       default:      return new Asset.Unknown(assetSchema)
     }
   },
@@ -206,6 +212,7 @@ const Asset = {
     this.uuid = uuid
     this.element = new Image
     this.element.src = src
+    this.element.classList.add('asset')
     extend(this.element.style, style)
   },
 
@@ -213,6 +220,7 @@ const Asset = {
     this.uuid = uuid
     this.element = document.createElement(tag) 
     this.element.innerText = text
+    this.element.classList.add('asset')
     extend(this.element.style, style)
   },
 
@@ -229,5 +237,6 @@ const Asset = {
 
 const program = new Program(programSchema)
 
+program.startSequence('abc')
 window.program = program
 setInterval(makeUpdate(program), TICK_RATE)
