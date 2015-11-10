@@ -9,11 +9,42 @@ export default {
     value: 20
   }],
   sequenceSchemas: [{
+    name: 'second',
+    uuid: 'def',
+    connectionSchemas: [{
+      expression: "true",
+      sequenceUUID: null
+    }],
+    assetSchemas: [{
+      uuid: 'stage',
+      type: 'stage',
+      style: {}
+    }, {
+      uuid: '123',
+      type: 'image',
+      src: 'emmi.png',
+      style: {} 
+    }, {
+      uuid: '456',
+      type: 'audio',
+      src: ['test.mp3']
+    }, {
+      uuid: '789',
+      type: 'text',
+      tag: 'p',
+      text: 'Click the logo to continue',
+      style: {
+        font: '30px ariel, sans-serif',
+        color: 'blue' 
+      } 
+    }],
+    taskSchemas: []
+  }, {
     name: 'main',
     uuid: 'abc',
     connectionSchemas: [{
       expression: "true",
-      sequenceUUID: null
+      sequenceUUID: "def"
     }],
     assetSchemas: [{
       uuid: 'stage',

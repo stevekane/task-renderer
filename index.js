@@ -1,9 +1,12 @@
 import {v4 as uuid} from 'node-uuid'
-import {pp, log, clone, extend, find, findWhere} from './utils'
+import {pp, log, clone, extend, find, findWhere, removeChildren} from './utils'
 import programSchema from './programSchema'
 
-const TICK_RATE = 24
-const STAGE_ELEMENT = document.body
+const FPS = 24
+const TICK_INTERVAL_MS = 1000 / FPS
+
+const STAGE_ELEMENT = document.getElementById('stage')
+const TOGGLE_BUTTON = document.getElementById('toggle')
 
 const PROGRAM_STATE = {
   LOADING: 0,
@@ -63,7 +66,6 @@ function * Wait (duration) {
 
     if (state === PROGRAM_STATE.PLAYING) elapsed++
   }
-  console.log(`waited: ${elapsed}`)
 }
 
 function * FadeIn (domAsset) {
@@ -113,10 +115,7 @@ function * IO (domAsset) {
   let done = false  
   let listener = domAsset.element.addEventListener('click', () => done = true)
 
-  console.log('please interact with the page')
   while (!done) yield
-
-  console.log('thanks for your participation')
   domAsset.element.removeEventListener(listener)
 }
 
@@ -127,14 +126,18 @@ function * PlayAudio (audioAsset) {
     onend: () => done = true
   })
 
-  sound.play()
-  while (!done) yield
-  console.log('audio completed')
+  while (true) {
+    if (done) break
+    if (state === PROGRAM_STATE.PAUSED && sound.playing())   sound.pause()
+    if (state === PROGRAM_STATE.PLAYING && !sound.playing()) sound.play()
+
+    let state = yield
+  }
 }
 
 class Connection {
   constructor({expression, sequenceUUID}) {
-    this.expression = new Function('$', expression) 
+    this.expression = new Function('$', `return ${expression}`) 
     this.sequenceUUID = sequenceUUID
   }
 }
@@ -184,6 +187,7 @@ class Program {
 
     this.activeSequence = new Sequence(sequenceSchema)
     this.state = PROGRAM_STATE.PLAYING
+    removeChildren(STAGE_ELEMENT)
   }
 }
 
@@ -235,5 +239,13 @@ const Asset = {
 const program = new Program(programSchema)
 
 program.startSequence('abc')
+setInterval(makeUpdate(program), TICK_INTERVAL_MS)
+toggle.addEventListener('click', function () {
+  if      (program.state === PROGRAM_STATE.PLAYING) program.state = PROGRAM_STATE.PAUSED
+  else if (program.state === PROGRAM_STATE.PAUSED)  program.state = PROGRAM_STATE.PLAYING
+  else    {}
+})
+window.onblur = function () {
+  if (program.state === PROGRAM_STATE.PLAYING) program.state = PROGRAM_STATE.PAUSED
+}
 window.program = program
-setInterval(makeUpdate(program), TICK_RATE)

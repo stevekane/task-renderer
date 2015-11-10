@@ -35,3 +35,9 @@ export function findWhere(key, val, array) {
   }
   return null
 }
+
+export function removeChildren (element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild) 
+  }
+}
