@@ -211,6 +211,7 @@ const Asset = {
 
   Image({uuid, src, style}) {
     this.uuid = uuid
+    this.parentUUID = parentUUID
     this.element = new Image
     this.element.src = src
     this.element.classList.add('asset')
@@ -219,6 +220,7 @@ const Asset = {
 
   Text({uuid, tag, text, style}) {
     this.uuid = uuid
+    this.parentUUID = parentUUID
     this.element = document.createElement(tag) 
     this.element.innerText = text
     this.element.classList.add('asset')
