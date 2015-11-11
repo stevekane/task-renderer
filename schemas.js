@@ -7,10 +7,20 @@ export const AssetSchema = {
     this.style = style
   },
 
-  Image(uuid, parentUUID, style) {
+  Image(uuid, parentUUID, src, style) {
     this.uuid = uuid
     this.parentUUID = parentUUID 
     this.type = 'image'
+    this.src = src
+    this.style = style
+  },
+
+  Container(uuid, parentUUID, tag, text, style) {
+    this.uuid = uuid
+    this.parentUUID = parentUUID 
+    this.type = 'container'
+    this.tag = tag
+    this.text = text
     this.style = style
   },
 
@@ -65,6 +75,16 @@ export const TaskSchema = {
   Wait(uuid, duration) {
     this.uuid = uuid
     this.duration = duration 
+  },
+
+  Insert(uuid, assetUUIDs) {
+    this.uuid = uuid
+    this.assetUUIDs = assetUUIDs
+  },
+
+  Remove(uuid, assetUUIDs) {
+    this.uuid = uuid
+    this.assetUUIDs = assetUUIDs 
   },
 
   IO(uuid, assetUUID) {

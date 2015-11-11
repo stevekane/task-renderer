@@ -30,7 +30,6 @@ function makeUpdate (program) {
     if (program.activeSequence) {
       if (program.activeSequence.tasks.next(program.state).done) {
         let targetSequence = program.activeSequence.findNext(program.variables)
-
         if (targetSequence) program.startSequence(targetSequence) 
         else                program.state = PROGRAM_STATE.DONE
       }
@@ -103,12 +102,20 @@ function * FadeOut (domAsset) {
   }
 }
 
-function * Insert (parent, domAsset) {
-  parent.element.appendChild(domAsset.element)
+//Asset should possibly have pointer to parent directly?
+//parent would likely differ for each asset anyway...
+function * Insert (assets) {
+  for (let asset of assets) {
+    asset.parent.element.appendChild(asset.element)
+  }
 }
 
-function * Remove (parent, domAsset) {
-  parent.element.removeChild(domAsset.element)
+//Asset should possibly have pointer to parent directly?
+//parent would likely differ for each asset anyway...
+function * Remove (assets) {
+  for (let asset of assets) {
+    asset.parent.element.removeChild(asset.element)
+  }
 }
 
 function * IO (domAsset) {
@@ -147,16 +154,7 @@ class Sequence {
     this.name = name
     this.uuid = uuid
     this.assets = assetSchemas.map(Asset.fromSchema)
-    this.tasks = Serial([
-      Wait(48), 
-      Parallel([
-        PlayAudio(findWhere('uuid', '456', this.assets)),
-        Serial([
-          Insert(findWhere('uuid', 'stage', this.assets), findWhere('uuid', '123', this.assets)),
-          FadeIn(findWhere('uuid', '123', this.assets))
-        ])
-      ])
-    ])
+    this.tasks = Wait(24)
     this.connections = connectionSchemas.map(s => new Connection(s))
   }
 
@@ -188,6 +186,7 @@ class Program {
     this.activeSequence = new Sequence(sequenceSchema)
     this.state = PROGRAM_STATE.PLAYING
     removeChildren(STAGE_ELEMENT)
+    console.log(`Starting: ${this.activeSequence.name}`)
   }
 }
 
@@ -195,11 +194,12 @@ class Program {
 const Asset = {
   fromSchema(assetSchema) {
     switch (assetSchema.type) {
-      case 'stage': return new Asset.Stage(assetSchema)
-      case 'image': return new Asset.Image(assetSchema)
-      case 'audio': return new Asset.Audio(assetSchema)
-      case 'text':  return new Asset.Text(assetSchema)
-      default:      return new Asset.Unknown(assetSchema)
+      case 'stage':     return new Asset.Stage(assetSchema)
+      case 'container': return new Asset.Container(assetSchema)
+      case 'image':     return new Asset.Image(assetSchema)
+      case 'text':      return new Asset.Text(assetSchema)
+      case 'audio':     return new Asset.Audio(assetSchema)
+      default:          return new Asset.Unknown(assetSchema)
     }
   },
 
@@ -209,7 +209,16 @@ const Asset = {
     extend(this.element.style, style)
   },
 
-  Image({uuid, src, style}) {
+  Container({uuid, parentUUID, tag, text, style}) {
+    this.uuid = uuid
+    this.parentUUID = parentUUID 
+    this.element = document.createElement(tag)
+    this.element.classList.add('asset')
+    this.element.innerText = text
+    extend(this.element.style, style)
+  },
+
+  Image({uuid, parentUUID, src, style}) {
     this.uuid = uuid
     this.parentUUID = parentUUID
     this.element = new Image
@@ -218,7 +227,7 @@ const Asset = {
     extend(this.element.style, style)
   },
 
-  Text({uuid, tag, text, style}) {
+  Text({uuid, parentUUID, tag, text, style}) {
     this.uuid = uuid
     this.parentUUID = parentUUID
     this.element = document.createElement(tag) 
@@ -240,7 +249,7 @@ const Asset = {
 
 const program = new Program(programSchema)
 
-program.startSequence('abc')
+program.startSequence('intro')
 setInterval(makeUpdate(program), TICK_INTERVAL_MS)
 toggle.addEventListener('click', function () {
   if      (program.state === PROGRAM_STATE.PLAYING) program.state = PROGRAM_STATE.PAUSED
