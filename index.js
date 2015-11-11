@@ -190,7 +190,7 @@ class Program {
   }
 }
 
-//TODO: really not a fan of the "asset" class for opacity.  Consider ditching CSS...
+//TODO: USE immediate-mode rendering ala react instead of DOM elements? 
 const Asset = {
   fromSchema(assetSchema) {
     switch (assetSchema.type) {
