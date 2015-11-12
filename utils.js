@@ -22,6 +22,10 @@ export function extend (obj, next) {
   return obj
 }
 
+export function last (array) {
+  return array[array.length - 1]
+}
+
 export function find (predFn, array) {
   for (let item of array) {
     if (predFn(item)) return item
