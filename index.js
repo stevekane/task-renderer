@@ -10,7 +10,7 @@ const STAGE_ELEMENT = document.getElementById('stage')
 const PROGRAM_STATE = {
   READY: 0,
   PLAYING: 1,
-  IO: 2,
+  SUSPEND: 2,
   PAUSED: 3
 }
 
@@ -93,6 +93,7 @@ class Program {
 
 window.onload = function () {
   program.activeSequence = program.sequences[0]
+  program.state = PROGRAM_STATE.PLAYING
   setInterval(makeUpdate(program), TICK_INTERVAL_MS)
   window.program = program
 }
