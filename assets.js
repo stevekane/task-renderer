@@ -2,6 +2,7 @@ export default {
   Stage(style) {
     this.uuid = 'stage'
     this.type = 'stage'
+    this.onClick = null
     this.style = style
   },
 
@@ -9,6 +10,7 @@ export default {
     this.uuid = uuid
     this.parentUUID = parentUUID 
     this.type = 'image'
+    this.onClick = null
     this.src = src
     this.style = style
     this.keyFrames = keyFrames
@@ -18,6 +20,7 @@ export default {
     this.uuid = uuid
     this.parentUUID = parentUUID 
     this.type = 'container'
+    this.onClick = null
     this.tag = tag
     this.text = text
     this.style = style
@@ -28,6 +31,7 @@ export default {
     this.uuid = uuid
     this.parentUUID = parentUUID  
     this.type = 'text'
+    this.onClick = null
     this.tag = tag
     this.text = text
     this.style = style
@@ -37,6 +41,7 @@ export default {
   Audio(uuid, src, keyFrames) {
     this.uuid = uuid
     this.type = 'audio'
+    this.onClick = null
     this.src = src 
     this.keyFrames = keyFrames
   }

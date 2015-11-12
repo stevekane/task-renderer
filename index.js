@@ -17,13 +17,11 @@ const PROGRAM_STATE = {
 function makeUpdate (program) {
   let lastTime = Date.now()
   let thisTime = lastTime
-  let frameNumber = 0
+  let frame = -1
   let dT = 0
 
   function render () {
-    ReactDOM.render(
-      Stage(program, frameNumber), 
-      STAGE_ELEMENT)
+    ReactDOM.render(Stage(program, frame), STAGE_ELEMENT)
   }
 
   return function () {
@@ -31,14 +29,68 @@ function makeUpdate (program) {
     thisTime = Date.now()
     dT = thisTime - lastTime
 
-    if (frameNumber < program.activeSequence.duration) {
-      frameNumber++
-    } else {
-      frameNumber = 0
-      program.activeSequence = findNextSequence(program)   
+    let {state, activeSequence} = program
+    let {READY, PLAYING, SUSPEND, PAUSED} = PROGRAM_STATE
+
+    if (!activeSequence) return
+
+    switch (state) {
+      case READY: break
+      case SUSPEND: break
+      case PAUSED: {
+        pauseAudio(program)
+        break
+      }
+      case PLAYING: {
+        let sequenceDone = frame >= activeSequence.duration
+
+        frame = sequenceDone 
+          ? 0
+          : frame + 1 
+        program.activeSequence = sequenceDone 
+          ? findNextSequence(program) 
+          : program.activeSequence
+
+        processAudio(program, frame)
+        processActions(program, frame)
+        requestAnimationFrame(render)
+        break
+      }
+      default: throw new Error(`Player in invald state ${state}`)
     }
-    requestAnimationFrame(render)
   }
+}
+
+//currently only handles a single action for a given frame
+//unclear if this should be enforced or relaxed?
+function processActions (program, frame) {
+  let action = findWhere('frame', frame, program.activeSequence.actions)
+  let {PLAYING, SUSPEND} = PROGRAM_STATE
+  let cb = () => program.state = PLAYING
+
+  if (!action) return
+
+  program.state = SUSPEND
+  switch (action.type) {
+    case 'click':  {
+      click(program.activeSequence, action.assetUUID, cb)
+      break
+    }
+    case 'choice': {
+      choice(program, action.variableName, action.choices, cb)
+      break
+    }
+    default: cb()
+  }
+}
+
+
+function pauseAudio (program, frame) {
+
+}
+
+function processAudio (program, frame) {
+
 }
 
 // Program -> Sequence || Null
@@ -52,28 +104,52 @@ function findNextSequence (program) {
   }
 }
 
-function * PlayAudio (audioAsset) {
-  let done = false
-  let sound = new Howl({
-    src: audioAsset.src,
-    onend: () => done = true
-  })
+function click (sequence, assetUUID, cb) {
+  let asset = findWhere('uuid', assetUUID, sequence.assets)
 
-  while (true) {
-    if (done) break
-    if (state === PROGRAM_STATE.PAUSED && sound.playing())   sound.pause()
-    if (state === PROGRAM_STATE.PLAYING && !sound.playing()) sound.play()
+  if (!asset) throw new Error(`no asset found with uuid ${assetUUID}`)
 
-    let state = yield
+  asset.onClick = function () { 
+    asset.onClick = null
+    cb()
+  }
+}
+
+function choice (program, variableName, choices, cb) {
+  let variable = program.variables[variableName]
+  let sequence = program.activeSequence
+
+  if (!variable) throw new Error(`no variable named ${variableName}`)
+  if (!sequence) throw new Error(`no active sequence`)
+
+  let clickCb = (value) => {
+    for (let {assetUUID, value} of choices) {
+      let asset = findWhere('uuid', assetUUID, sequence.assets)
+
+      if (!asset) throw new Error(`no asset found with uuid ${assetUUID}`)
+
+      asset.onClick = null
+    }
+    variable.value = value
+    cb()
+  }
+
+  for (let {assetUUID, value} of choices) {
+    let asset = findWhere('uuid', assetUUID, sequence.assets)
+
+    if (!asset) throw new Error(`no asset found with uuid ${assetUUID}`)
+
+    asset.onClick = clickCb.bind(null, value)
   }
 }
 
 class Sequence {
-  constructor(uuid, name, duration, connections, assets) {
+  constructor(uuid, name, duration, actions, connections, assets) {
     this.name = name
     this.uuid = uuid
     this.duration = duration
     this.frameNumber = 0
+    this.actions = actions
     this.connections = connections
     this.assets = assets
   }

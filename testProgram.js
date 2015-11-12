@@ -1,13 +1,12 @@
 import {Integer} from './variables'
 import {Stage, Image, Text, Container, Audio} from './assets'
 import {Expression, Always} from './connections'
-import {Click, Select} from './io'
 import {Opacity, Parent} from './keyFrames'
+import {Click, Choice} from './actions'
 
 const FPS = 24
-const START_CHOICES = FPS * 1
-const END_INTRO = FPS * 3
-const ALL_FADE_OUT = END_INTRO - FPS / 2
+const START_CHOICES = FPS * 3
+const END_INTRO = START_CHOICES + FPS / 2
 
 export default {
   uuid: 'program',
@@ -20,6 +19,15 @@ export default {
     name: 'intro',
     uuid: 'intro',
     duration: END_INTRO,
+    actions: [
+      new Click(0, '3'),
+      new Choice(START_CHOICES, 'feature', [
+        { assetUUID: '5', value: 0 },
+        { assetUUID: '6', value: 1 },
+        { assetUUID: '7', value: 2 },
+        { assetUUID: '8', value: 3 }
+      ])
+    ],
     connections: [
       new Expression('$.feature.value === 0', 'dynamic'),
       new Expression('$.feature.value === 1', 'branching'),
@@ -30,7 +38,7 @@ export default {
       new Stage({
         backgroundColor: 'black',
       }),
-      new Image('1', 'stage', 'emmi.png', {}, {
+      new Text('1', 'stage', 'h1', 'Welcome to the player demo', {}, {
         parent: [
           new Parent(0, 'stage'),
           new Parent(END_INTRO, null),
@@ -38,55 +46,94 @@ export default {
         opacity: [
           new Opacity('linear', 0, 0),
           new Opacity('linear', FPS / 2, 1),
-          new Opacity('linear', ALL_FADE_OUT, 0),
-        ]
-      }),
-      new Text('2', 'stage', 'h1', 'Demo', {}, {
-        parent: [
-          new Parent(0, 'stage'),
-          new Parent(END_INTRO, null),
-        ],
-        opacity: [
-          new Opacity('linear', 0, 0),
-          new Opacity('linear', FPS / 2, 1),
-          new Opacity('linear', ALL_FADE_OUT, 1),
+          new Opacity('linear', START_CHOICES, 1),
           new Opacity('linear', END_INTRO, 0)
         ] 
       }),
-      new Container('3', 'stage', 'button', 'BEGIN', {}, {
+      new Image('2', 'stage', 'emmi.png', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 0),
+          new Opacity('linear', FPS / 2, 1),
+          new Opacity('linear', START_CHOICES, 0),
+        ]
+      }),
+      new Container('3', 'stage', 'button', 'begin', {}, {
         parent: [
           new Parent(0, 'stage'),
           new Parent(END_INTRO, null),
         ],
         opacity: [
           new Opacity('linear', 0, 1),
-          new Opacity('linear', ALL_FADE_OUT, 1),
+          new Opacity('linear', START_CHOICES, 1),
           new Opacity('linear', END_INTRO, 0),
         ]
       }),
 
-      //TODO: add more audio files for actual audio
-      //new Audio('4', 'test.mp3', {}),
-      //new Container('5', 'stage', 'ul', '', {}, {
-      //
-      //}),
-      //new Text('6', 'stage', 'h1', 'This demo showcases', {}, {
-      //
-      //}),
-      //new Text('7', '5', 'li', 'Branching', {}, {
-      //
-      //}),
-      //new Text('8', '5', 'li', 'Dynamic Content', {}, {
-      //
-      //}),
-      //new Text('9', '5', 'li', 'User Interaction', {}, {
-      //
-      //}),
+      new Text('4', 'stage', 'h2', 'This demo showcases', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 1),
+          new Opacity('linear', START_CHOICES, 1),
+          new Opacity('linear', END_INTRO, 0),
+        ]
+      }),
+      new Container('5', 'stage', 'button', 'Dynamic Content', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 1),
+          new Opacity('linear', START_CHOICES, 1),
+          new Opacity('linear', END_INTRO, 0),
+        ]
+      }),
+      new Container('6', 'stage', 'button', 'Branching', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 1),
+          new Opacity('linear', START_CHOICES, 1),
+          new Opacity('linear', END_INTRO, 0),
+        ]
+      }),
+      new Container('7', 'stage', 'button', 'User Interaction', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 1),
+          new Opacity('linear', START_CHOICES, 1),
+          new Opacity('linear', END_INTRO, 0),
+        ]
+      }),
+      new Container('8', 'stage', 'button', 'Done', {}, {
+        parent: [
+          new Parent(0, 'stage'),
+          new Parent(END_INTRO, null),
+        ],
+        opacity: [
+          new Opacity('linear', 0, 1),
+          new Opacity('linear', START_CHOICES, 1),
+          new Opacity('linear', END_INTRO, 0),
+        ]
+      }),
     ],
   }, {
     name: 'dynamic',
     uuid: 'dynamic',
     duration: FPS,
+    actions: [],
     connections: [
       new Always('done')
     ],
@@ -96,6 +143,7 @@ export default {
     name: 'branching',
     uuid: 'branching',
     duration: FPS,
+    actions: [],
     connections: [
       new Always('done')
     ],
@@ -105,6 +153,7 @@ export default {
     name: 'interaction',
     uuid: 'interaction',
     duration: FPS,
+    actions: [],
     connections: [
       new Always('done')
     ],
@@ -114,6 +163,7 @@ export default {
     name: 'done',
     uuid: 'done',
     duration: FPS,
+    actions: [],
     connections: [
       new Always('intro')
     ],
